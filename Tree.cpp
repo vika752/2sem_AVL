@@ -1,3 +1,4 @@
+//графиков нет.. доб эл-та, вращение ....
 #include <iostream>
 using namespace std;
 struct TreeAVL{
@@ -11,7 +12,7 @@ struct TreeAVL{
 //вращение влево
 void r_r(struct TreeAVL **root, struct TreeAVL *A){
 
-    struct TreeAVL *B=A->right, *p=A->parent;
+    struct TreeAVL *B = A->right, *p = A->parent;
 
     A->right = B->left;
     if (A->right) A->right->parent = A;
