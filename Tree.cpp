@@ -145,4 +145,27 @@ void addAVL(struct TreeAVL **root, int key){
     }
 }
 
+//Функция, которая должна выводить дерево (те подсчитать уровень эл-та (на к-м он нах-ся) и поставить пробелы (=уровень эл-та)
+// Затем он выводит ключ и bf элемента -> новой строке.... но функция немного не работает...
+void write_tree(struct TreeAVL *root,int level){
+
+    if (root){
+
+         if (root->right){
+              ++level;
+              write_tree (root->right, level);
+              --level;
+         }
+         int i;
+         for (i = 0; i < level; ++i) printf (" ");
+
+         printf ("%d bf %d \n", root->key, root->bf);
+
+         if (root->left){
+                ++level;
+               write_tree (root->left, level);
+               --level;
+         }
+    }
+}
 
