@@ -1,6 +1,8 @@
 //графиков нет.. доб эл-та, вращение ....
+
 #include <iostream>
 using namespace std;
+
 struct TreeAVL{
 
     struct TreeAVL *parent;
@@ -9,11 +11,11 @@ struct TreeAVL{
     int key; 
     int bf; // коэф-т
 };
+
 //вращение влево
 void r_r(struct TreeAVL **root, struct TreeAVL *A){
 
     struct TreeAVL *B = A->right, *p = A->parent;
-
     A->right = B->left;
     if (A->right) A->right->parent = A;
 
@@ -47,17 +49,17 @@ void l_l(struct TreeAVL ** root, struct TreeAVL *A){
     else *root = B;
 }
 
-void vsota_tree(struct TreeAVL *root,int level,int *h){
+void vsota_tree(struct TreeAVL *root, int level, int *h){
 // ф-ия vsota_tree опр выссоту дерева
    if(root){
-            if(root->right){
+            if (root->right){
                   ++level;
                   vsota_tree(root->right, level, h);
                   --level;
             }
-            if(level>*h) *h=level;
+            if (level>*h) *h = level;
 
-            if(root->left){
+            if (root->left){
                   ++level;
                   vsota_tree(root->left, level, h);
                   --level;
@@ -74,15 +76,15 @@ void b_f(struct TreeAVL *r){
 
     if(y) vsota_tree(y, 1, &a);
     if(z) vsota_tree(z, 1, &b);
-    x->bf = a-b;
+    x->bf = a - b;
 
 }
 
 //добавление элемента
-void addAVL(struct TreeAVL **root, int key){
+void add_AVL(struct TreeAVL **root, int key){
 // осн ф-ия
  
-   struct TreeAVL *nowy_element,*p,*r, *d;
+   struct TreeAVL *nowy_element, *p, *r, *d;
       int t;
    // создаем эл-т
       nowy_element = (struct TreeAVL *)malloc(sizeof (struct TreeAVL));
@@ -110,7 +112,7 @@ void addAVL(struct TreeAVL **root, int key){
                else p->right = nowy_element;
                nowy_element->parent = p;
          }
-         r=nowy_element;
+         r = nowy_element;
          while (p){ // цикл подсчитывает bf при доб эл-та
                if (p->left == r) p->bf += 1;
                else if (p->right == r) p->bf -= 1;
@@ -138,13 +140,119 @@ void addAVL(struct TreeAVL **root, int key){
                      }
               }
         p = p->parent; 
-        if(p->right)b_f(p->right);
-        if(p->left)b_f(p->left);
+        if (p->right) b_f(p->right);
+        if (p->left) b_f(p->left);
         b_f(p);
         }
     }
 }
 
+//уд эл-та
+struct TreeAVL* delKey(struct TreeAVL **root, int key){
+ 
+   if (*root != NULL){
+             if ((*root)->key > key) return delKey(& (*root)->left, key);
+             else{
+                  if ((*root)->key < key) return delKey(& (*root)->right, key);
+                  else{
+                         struct TreeAVL *z = *root, *p = z, *r = z,*y;
+                         if (z->left == NULL){
+                                 if (z->right) z->right->parent = (*root)->parent;
+                                 *root = z->right;
+                                 y = z->parent;
+                                 free (z);
+                                 z = NULL;
+                                 return y;
+                          }else{
+                          }else{
+                                 if (z->right == NULL){
+                                          z->left->parent = (*root)->parent;
+                                          *root = z->left;
+                                          y = z->parent;
+                                         free(z);
+                                         z = NULL;
+                                         return y;
+                                  }else{
+                                         p = z->left;
+                                         r = z;
+                                         while (p->right != NULL) {
+                                                    r = p;
+                                                    p = p->right;
+                                         }
+                                         int temp = p->key;
+                                         p->key = z->key;
+                                         z->key = temp;
+
+                                         if (r->key != z->key){
+                                                    r->right = p->left;
+                                                    if(r->right != NULL) r->right->parent = p->parent;
+                                         }
+                                         else{
+                                                    r->left = p->left;
+                                                    if (r->left != NULL) r->left->parent = p->parent;
+                                         }
+                                         y = p->parent;
+                                         free (p);
+                                         p = NULL;
+                                         return y;
+                                 }
+                          }
+                  }
+           }
+      }
+}
+
+void remove_AVL(struct TreeAVL **root, int x){
+
+    if (*root){
+           struct TreeAVL *p = NULL,*r = NULL;
+           p = delKey(root,x); // стираем узел
+           r = p;
+
+           if (*root && p){ 
+                   while (p){ //цикл, к-й ищет, где сломалось все
+                          b_f (p);
+                          if (p->bf == 2 || p->bf == -2) break; 
+                          r = p;
+                          p = p->parent;
+                   }
+                   if (r == p){ 
+          // когда цикл вып-ся только 1 раз
+
+                          if (!p->right) r = p->left;
+                          else if (!p->left) r = p->right;
+                    }
+          // вып вращение
+                   if (p){
+                         if (p->bf == 2){
+                                  if (p->right != r){
+                                         if (r->bf == -1){ // дв-е вр
+                                                    r_r(root, p->left);
+                                                    l_l(root, p);
+                                         }
+                                         else l_l(root,p);
+                                  }
+                          }else{
+                                 if (p->left != r){
+                                        if (r->bf == 1){ // дв-е вр
+                                                    l_l(root, p->right);
+                                                    r_r(root, p);
+                                        }
+                                        else r_r(root, p);
+                                  }
+                           }
+                          // вычисляем bf после вращения
+ 
+                     if (p->parent) p = p->parent;
+                         if (p->right) b_f(p->right);
+                         if (p->left) b_f(p->left);
+                         b_f(p);
+                  }
+           }
+     }
+}
+
+ 
 //Функция, которая должна выводить дерево (те подсчитать уровень эл-та (на к-м он нах-ся) и поставить пробелы (=уровень эл-та)
 // Затем он выводит ключ и bf элемента -> новой строке.... но функция немного не работает...
 void write_tree(struct TreeAVL *root,int level){
@@ -153,7 +261,7 @@ void write_tree(struct TreeAVL *root,int level){
 
          if (root->right){
               ++level;
-              write_tree (root->right, level);
+              write_tree(root->right, level);
               --level;
          }
          int i;
